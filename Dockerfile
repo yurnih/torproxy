@@ -14,6 +14,6 @@ RUN set -ex; \
 USER tor
 EXPOSE 9050 9051
 
-HEALTHCHECK --interval=300s --timeout=10s --start-period=60s --retries=3 CMD curl -s --socks5 localhost:9050 https://check.torproject.org/ | grep -i "congratulations"
+HEALTHCHECK --interval=300s --timeout=10s --start-period=300s --retries=3 CMD curl -s --socks5 localhost:9050 https://check.torproject.org/ | grep -i "congratulations"
 
 CMD [ "/usr/bin/tor" ]
