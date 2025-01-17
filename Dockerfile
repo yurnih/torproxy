@@ -4,14 +4,11 @@ FROM debian:12-slim
 #     apk --no-cache --update --upgrade add curl tor \
 RUN set -ex; \
     apt-get update && apt-get install -y tor curl \
-    && mkdir /etc/torrc.d \
-    && mv /etc/tor/torrc /etc/tor/torrc.orig \
-    && echo 'SOCKSPort 0.0.0.0:9050' >>/etc/tor/torrc \
-    && echo 'Log notice stderr' >>/etc/tor/torrc \
-    && echo 'DataDirectory /var/lib/tor' >>/etc/tor/torrc \
-    # && echo 'ControlPort 9051' >>/etc/tor/torrc \
-    && echo 'RunAsDaemon 0' >>/etc/tor/torrc \
-    && echo '%include /etc/torrc.d/*.conf' >>/etc/tor/torrc \
+    && sed -i 's/#SocksPort 9050/SocksPort 0.0.0.0:9050/' /etc/tor/torrc \
+    && sed -i 's/#Log debug stderr/Log notice stderr/' /etc/tor/torrc \
+    && sed -i 's/#DataDirectory/DataDirectory/' /etc/tor/torrc \
+    # && sed -i '/#ControlPort 9051/ControlPort 9051/' /etc/tor/torrc \
+    # && sed -i '/#RunAsDaemon 1/RunAsDaemon 0/' /etc/tor/torrc \
     && useradd -ms /bin/bash tor \
     && chown -R tor /var/lib/tor
 
@@ -20,6 +17,6 @@ EXPOSE 9050
 # 9051
 VOLUME /var/lib/tor
 
-HEALTHCHECK --interval=300s --timeout=10s --start-period=300s --retries=3 CMD curl -s --socks5 localhost:9050 https://check.torproject.org/ | grep -i "congratulations"
+HEALTHCHECK --interval=3600s --timeout=10s --start-period=300s --retries=3 CMD curl -s --socks5 localhost:9050 https://check.torproject.org/ | grep -i "congratulations"
 
 CMD [ "/usr/bin/tor" ]
